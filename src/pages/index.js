@@ -15,7 +15,6 @@ import { titleIfy, slugify } from "../../utils/helpers"
 import { graphql } from "gatsby"
 
 const Home = ({ data: gqlData }) => {
-  console.log("data", data)
   const {
     inventoryInfo,
     categoryInfo: { data },
