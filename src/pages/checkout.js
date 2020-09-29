@@ -55,9 +55,8 @@ const Checkout = ({ context }) => {
     name: "",
     email: "",
     street: "",
-    city: "",
-    postal_code: "",
-    state: "",
+    address: "",
+    phone: "",
   })
 
   const stripe = useStripe()
@@ -70,54 +69,57 @@ const Checkout = ({ context }) => {
 
   const handleSubmit = async event => {
     event.preventDefault()
-    const { name, email, street, city, postal_code, state } = input
+    const { name, email, street, city, postal_code, address } = input
     const { total, clearCart } = context
 
-    if (!stripe || !elements) {
-      // Stripe.js has not loaded yet. Make sure to disable
-      // form submission until Stripe.js has loaded.
-      return
-    }
+    // if (!stripe || !elements) {
+    //   // Stripe.js has not loaded yet. Make sure to disable
+    //   // form submission until Stripe.js has loaded.
+    //   return
+    // }
 
     // Validate input
-    if (!street || !city || !postal_code || !state) {
-      setErrorMessage("Please fill in the form!")
-      return
-    }
+    // if (!street || !city || !postal_code || !state) {
+    //   setErrorMessage("Please fill in the form!")
+    //   return
+    // }
 
     // Get a reference to a mounted CardElement. Elements knows how
     // to find your CardElement because there can only ever be one of
     // each type of element.
-    const cardElement = elements.getElement(CardElement)
+    // const cardElement = elements.getElement(CardElement)
 
     // Use your card Element with other Stripe.js APIs
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card: cardElement,
-      billing_details: { name: name },
-    })
+    // const { error, paymentMethod } = await stripe.createPaymentMethod({
+    //   type: "card",
+    //   card: cardElement,
+    //   billing_details: { name: name },
+    // })
 
-    if (error) {
-      setErrorMessage(error.message)
-      return
-    }
+    // if (error) {
+    //   setErrorMessage(error.message)
+    //   return
+    // }
 
     const order = {
       email,
       amount: total,
-      address: state, // should this be {street, city, postal_code, state} ?
-      payment_method_id: paymentMethod.id,
+      address: address, // should this be {street, city, postal_code, state} ?
+      // payment_method_id: paymentMethod.id,
       receipt_email: "customer@example.com",
       id: uuid(),
     }
     console.log("order: ", order)
+
     // TODO call API
-    setOrderCompleted(true)
-    clearCart()
+    // setOrderCompleted(true)
+    // clearCart()
   }
 
   const { numberOfItemsInCart, cart, total } = context
   const cartEmpty = numberOfItemsInCart === Number(0)
+
+  console.log("Checkout context", context)
 
   if (orderCompleted) {
     return (
@@ -164,7 +166,7 @@ const Checkout = ({ context }) => {
                       </p>
                       <div className="flex flex-1 justify-end">
                         <p className="m-0 pl-10 text-gray-900 tracking-tighter font-semibold">
-                          {DENOMINATION + item.price}
+                          {item.quantity} x {item.price + DENOMINATION}
                         </p>
                       </div>
                     </div>
@@ -181,9 +183,9 @@ const Checkout = ({ context }) => {
                       onChange={onChange}
                       value={input.name}
                       name="name"
-                      placeholder="Cardholder name"
+                      placeholder="Name"
                     />
-                    <CardElement className="mt-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    {/* <CardElement className="mt-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" /> */}
                     <Input
                       onChange={onChange}
                       value={input.email}
@@ -192,28 +194,17 @@ const Checkout = ({ context }) => {
                     />
                     <Input
                       onChange={onChange}
-                      value={input.street}
-                      name="street"
-                      placeholder="Street"
+                      value={input.phone}
+                      name="phone"
+                      placeholder="Phone"
                     />
                     <Input
                       onChange={onChange}
-                      value={input.city}
-                      name="city"
-                      placeholder="City"
+                      value={input.address}
+                      name="address"
+                      placeholder="Enter Address"
                     />
-                    <Input
-                      onChange={onChange}
-                      value={input.state}
-                      name="state"
-                      placeholder="State"
-                    />
-                    <Input
-                      onChange={onChange}
-                      value={input.postal_code}
-                      name="postal_code"
-                      placeholder="Postal Code"
-                    />
+
                     <button
                       type="submit"
                       disabled={!stripe}
@@ -226,23 +217,23 @@ const Checkout = ({ context }) => {
                   </form>
                 </div>
               </div>
-              <div className="md:pt-20">
+              <div className="md:pt-20 bg-gray-200 rounded">
                 <div className="ml-4 pl-2 flex flex-1 justify-end pt-2 md:pt-8 pr-4">
                   <p className="text-sm pr-10">Subtotal</p>
                   <p className="tracking-tighter w-38 flex justify-end">
-                    {DENOMINATION + total}
+                    {total + DENOMINATION}
                   </p>
                 </div>
                 <div className="ml-4 pl-2 flex flex-1 justify-end pr-4">
-                  <p className="text-sm pr-10">Shipping</p>
+                  <p className="text-sm pr-10">Phí vận chuyển</p>
                   <p className="tracking-tighter w-38 flex justify-end">
-                    FREE SHIPPING
+                    Miễn phí
                   </p>
                 </div>
-                <div className="md:ml-4 pl-2 flex flex-1 justify-end bg-gray-200 pr-4 pt-6">
+                <div className="md:ml-4 pl-2 flex flex-1 justify-end  pr-4 pt-6 ">
                   <p className="text-sm pr-10">Total</p>
                   <p className="font-semibold tracking-tighter w-38 flex justify-end">
-                    {DENOMINATION + (total + calculateShipping())}
+                    {total + calculateShipping() + DENOMINATION}
                   </p>
                 </div>
                 <button
